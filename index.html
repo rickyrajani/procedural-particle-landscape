@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            html, body, canvas {
+                margin: 0;
+                background-color: black;
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                padding: 0;
+            }
+            ul {padding-left: 0}
+            li {
+                display: inline;
+                list-style: none;
+            }
+            li a {
+                color: black;
+            }
+            .no-webgl2 {
+                position: absolute;
+                top: 50%;
+                width: 100%;
+                text-align: center;
+                color: red;
+                font-size: 1em;
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <div class="no-webgl2">
+        Your browser does not support WebGL2. Please download the latest desktop version of . 
+        <a href="https://www.google.com/chrome/browser/desktop/" target="_blank">Chrome</a> or 
+        <a href="https://www.mozilla.org/en-US/firefox/new/" target="_blank">Firefox</a>.
+        <div>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+        <script src="build/bundle.js"></script>
+    </body>
+</html>
