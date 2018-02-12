@@ -8,6 +8,7 @@ const RANDOM = 'Random';
 const TEAPOT = 'Teapot';
 const HORSE = 'Horse';
 const HEAD = 'Head';
+const CUBE = 'Cube';
 
 // GUI parameters
 export const params = {
@@ -37,23 +38,26 @@ function setModel(model) {
   switch(model) {
     case RANDOM:
       renderer.createRandom = true;
-      params.numParticles = 5e5;
+      params.numParticles = 1e5;
       init(null);
+      break;
+    case CUBE:
+      renderer.sizeDivide = 2;
+      renderer.cube = true;
+      loadMesh("./models/cube.obj.txt");  
       break;
     case TEAPOT:
       renderer.sizeDivide = 20;
-      // renderer.sizeDivide = 5000;      
       loadMesh("./models/tea.obj.txt");
       break;
     case HORSE:
       renderer.sizeDivide = 400;
-      // renderer.sizeDivide = 100000;      
       loadMesh("./models/horse.obj.txt");
       break;
     case HEAD:
       renderer.sizeDivide = 50;    
-      // renderer.sizeDivide = 12500;
       loadMesh("./models/male_head.obj.txt");
+      break;
   }
 }
 

@@ -154,12 +154,13 @@ export function loadMeshData(string) {
     if ( parts.length > 0 ) {
       switch(parts[0]) {
         case 'v':
-          var objPosition = new Vector3(parts[1], parts[2], parts[3]);
+          // var objPosition = new Vector3(parts[1], parts[2], parts[3]);
           // var screenPosition = toScreenXY(objPosition);
           // vertices.push(screenPosition.x);
           // vertices.push(screenPosition.y);
           vertices.push(parseFloat(parts[1]));
           vertices.push(parseFloat(parts[2]));
+          vertices.push(parseFloat(parts[3]));   
           break;
         case 'vn':
           normals.push(parseFloat(parts[1]));
@@ -175,7 +176,7 @@ export function loadMeshData(string) {
       }
     }
   }
-  var vertexCount = vertices.length / 2;
+  var vertexCount = vertices.length / 3;
   console.log("Loaded mesh with " + vertexCount + " vertices");
   return {
     vertices: new Float32Array(vertices),

@@ -16,7 +16,7 @@ void main() {
       intensity
     );
     vec3 highlightColor = mix(color.rgb, vec3(1.0), blendValues);
-    color = vec4(highlightColor, color.a);
+    color = vec4(highlightColor, 1);
   }
 }
 `;

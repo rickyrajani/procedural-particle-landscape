@@ -1,6 +1,7 @@
 import { gl, mousePos } from './init';
 import { mat3, mat4, vec4 } from 'gl-matrix';
 import { params } from './main'
+import { Vector4 } from 'three';
 import { createBufferFromArray, createBufferWithSize, createProgram, createVAO, invert } from './libs/utils'
 import { vertexFeedbackShader } from './shaders/calc_vertex'
 import { fragmentEmptyShader } from './shaders/calc_empty_fragment'
@@ -18,6 +19,7 @@ class Renderer {
     constructor() {
         this.time = 0;
         this.createRandom = false;
+        this.cube = false;
         this.sizeDivide = 20;
 
         this._projectionMatrix = mat4.create();
@@ -31,49 +33,40 @@ class Renderer {
   
     createBuffers() {
         // Create vertex buffers
-        this.multiplyArrayNum = 1;
-        if(!this.createRandom) {
-            this.multiplyArrayNum = 20;
-        }
-        const vertices = new Float32Array(params.numParticles * 2 * this.multiplyArrayNum);        
+        var extraParticles = params.numParticles * 6;
+        this.totalParticles = params.numParticles + extraParticles;
+        const vertices = new Float32Array((params.numParticles + extraParticles) * 4);   
         if(this.createRandom) {
-            for (let i = 0; i < vertices.length; i++) {
-                vertices[i] = Math.random() * 2 - 1;
-            } 
+            for (let i = 0; i < vertices.length; i+=4) {
+                vertices[i] = Math.random() - 0.5;
+                vertices[i + 1] = Math.random() - 0.5;
+                vertices[i + 2] = Math.random() - 0.5;
+                vertices[i + 3] = 1;                
+            }
         } else {
             var count = 0;
-            for (let i = 0; i < vertices.length - params.numParticles * 2 * 15; i += 10) {
-                vertices[i] = this.mesh.vertices[count] / this.sizeDivide - (Math.random() / 100);
-                vertices[i + 1] = this.mesh.vertices[count + 1] / this.sizeDivide + (Math.random() / 100);
-                vertices[i + 2] = this.mesh.vertices[count] / this.sizeDivide + (Math.random() / 100);
-                vertices[i + 3] = this.mesh.vertices[count + 1] / this.sizeDivide - (Math.random() / 100);
-                vertices[i + 4] = this.mesh.vertices[count] / this.sizeDivide - 0.01 - (Math.random() / 100);
-                vertices[i + 5] = this.mesh.vertices[count + 1] / this.sizeDivide - 0.01 - (Math.random() / 100);
-                vertices[i + 6] = this.mesh.vertices[count] / this.sizeDivide + 0.01 + (Math.random() / 100);
-                vertices[i + 7] = this.mesh.vertices[count + 1] / this.sizeDivide - 0.01 + - (Math.random() / 100);
-                vertices[i + 8] = this.mesh.vertices[count] / this.sizeDivide - 0.01;
-                vertices[i + 9] = this.mesh.vertices[count + 1] / this.sizeDivide + 0.01;
-                count+=2;         
-            }
-            for (let i = params.numParticles * 2 * (this.multiplyArrayNum - 15); i < vertices.length; i++) {
-                vertices[i] = Math.random() * 2 - 1;
+            for (let i = 0; i < vertices.length; i +=4) {
+                vertices[i] = this.mesh.vertices[count] / this.sizeDivide;
+                vertices[i + 1] = this.mesh.vertices[count + 1] / this.sizeDivide;
+                vertices[i + 2] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                vertices[i + 3] = 1;
+                count += 3;                   
             }
         }
-
         this.vertexBuffers = [
             createBufferFromArray(vertices),
-            createBufferWithSize(params.numParticles * 2 * 4 * this.multiplyArrayNum)
+            createBufferWithSize(this.totalParticles * 4 * 4)
         ];
 
         // Create velocity buffers
-        const velocities = new Float32Array(params.numParticles * 2 * this.multiplyArrayNum);
+        const velocities = new Float32Array(this.totalParticles * 3);
         for (let i = 0; i < velocities.length; i++) {
             velocities[i] = 0;
         }
 
         this.velocityBuffers = [
             createBufferFromArray(velocities),
-            createBufferWithSize(params.numParticles * 2 * 4 * this.multiplyArrayNum)
+            createBufferWithSize(this.totalParticles * 3 * 4)
         ];
 
         // Create quad buffer
@@ -98,9 +91,10 @@ class Renderer {
             gl.SEPARATE_ATTRIBS
         );
         
-        // Get uniform location for mouse position
+        // Get uniform locations
         this.mousePosLocation = gl.getUniformLocation(this.programFeedback, "u_mouse");
         this.clock = gl.getUniformLocation(this.programFeedback, "u_time");
+        this.viewProjectionMatrix = gl.getUniformLocation(this.programFeedback, "u_viewProjectionMatrix")
         
         // Create program to render particles
         this.programDisplay = createProgram(gl,
@@ -119,37 +113,37 @@ class Renderer {
         this.feedbackVAOs.push(createVAO([{
             data: this.vertexBuffers[0],
             location: VERTEX_ATTRIBUTE_POS,
-            elementSize: 2
+            elementSize: 4
         },
         {
             data: this.velocityBuffers[0],
             location: VELOCITY_ATTRIBUTE_POS,
-            elementSize: 2
+            elementSize: 3
         }]
         ));
 
         this.feedbackVAOs.push(createVAO([{
             data: this.vertexBuffers[1],
             location: VERTEX_ATTRIBUTE_POS,
-            elementSize: 2
+            elementSize: 4
         },
         {
             data: this.velocityBuffers[1],
             location: VELOCITY_ATTRIBUTE_POS,
-            elementSize: 2
+            elementSize: 3
         }]
         ));
 
         this.displayVAOs.push(createVAO([{
             data: this.vertexBuffers[0],
             location: VERTEX_ATTRIBUTE_POS,
-            elementSize: 2
+            elementSize: 4
         }]));
 
         this.displayVAOs.push(createVAO([{
             data: this.vertexBuffers[1],
             location: VERTEX_ATTRIBUTE_POS,
-            elementSize: 2
+            elementSize: 4
         }]));
 
         this.postVAO = createVAO([{
@@ -186,10 +180,11 @@ class Renderer {
         gl.useProgram(this.programFeedback);
         gl.uniform2fv(this.mousePosLocation, mousePos);
         gl.uniform1f(this.programFeedback.u_time, this.clock); 
+        gl.uniformMatrix4fv(this.programFeedback.u_viewProjectionMatrix, false, this._viewProjectionMatrix);         
 
         gl.beginTransformFeedback(gl.POINTS);
         gl.bindVertexArray(this.feedbackVAOs[currentIndex]);
-        gl.drawArrays(gl.POINTS, 0, params.numParticles * this.multiplyArrayNum);
+        gl.drawArrays(gl.POINTS, 0, this.totalParticles);
         gl.bindVertexArray(null);
         gl.endTransformFeedback();
 
@@ -211,7 +206,7 @@ class Renderer {
 
         gl.useProgram(this.programDisplay);
         gl.bindVertexArray(this.displayVAOs[index]);
-        gl.drawArrays(gl.POINTS, 0, params.numParticles * this.multiplyArrayNum);
+        gl.drawArrays(gl.POINTS, 0, this.totalParticles);
         gl.bindVertexArray(null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
