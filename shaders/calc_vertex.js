@@ -12,7 +12,7 @@ export const vertexFeedbackShader =
   uniform mat4 u_viewProjectionMatrix;
 
   float PARTICLE_MASS = 1.0;
-  float GRAVITY_CENTER_MASS = 100.0;
+  float GRAVITY_CENTER_MASS = 15.0;
   float DAMPING = 1e-6;
   float PI = 3.14159;
  
@@ -24,7 +24,7 @@ export const vertexFeedbackShader =
     float force = PARTICLE_MASS * GRAVITY_CENTER_MASS / (r * r) * DAMPING;
     float maxForce = min(force, DAMPING * 10.0);
 
-    vec2 acceleration = force / PARTICLE_MASS * direction;
+    vec2 acceleration = (force / PARTICLE_MASS * direction) / 2.0;
     vec2 newVelocity = a_velocity.xy + acceleration;
     vec2 newPositionXY = a_position.xy + newVelocity;    
     vec3 newPosition = vec3(newPositionXY, a_position.z);
@@ -35,7 +35,7 @@ export const vertexFeedbackShader =
 
     v_velocity = vec3(newVelocity * 0.99, a_velocity.z);
     v_position = vec4(newPosition, 1.0);
-    
+
     // Bounce at borders
     if (v_position.x > 1.0 || v_position.x < -1.0) {
       v_velocity.x *= -0.5;

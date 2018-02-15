@@ -56,7 +56,7 @@ canvas.addEventListener('touchmove', event => {
   
 
 // Set clear color
-gl.clearColor(1.0, 1.0, 1.0, 1.0);
+gl.clearColor(0.2, 0.1, 0.3, 1.0);
 
 // Set camera position and target
 camera.position.set(0,0,0);
