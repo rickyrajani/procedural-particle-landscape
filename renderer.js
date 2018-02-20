@@ -17,7 +17,7 @@ const VELOCITY_ATTRIBUTE_POS = 1;
 
 class Renderer {
     constructor() {
-        this.time = 0;
+        this.clock = 0.0;
         this.createRandom = false;
         this.cube = false;
         this.sizeDivide = 20;
@@ -28,20 +28,23 @@ class Renderer {
     }
 
     update() {
-        this.time++;
+        this.clock += 1.0;
     }
   
     createBuffers() {
         // Create vertex buffers
+        // for(var i = 0; i < params.numParticles; i++) {
+        //     console.log(this.mesh.vertices[i]);
+        // }
         var extraParticles = params.numParticles * 6;
         this.totalParticles = params.numParticles + extraParticles;
         const vertices = new Float32Array((params.numParticles + extraParticles) * 4);   
         if(this.createRandom) {
             for (let i = 0; i < vertices.length; i+=4) {
-                vertices[i] = Math.random() - 0.5;
-                vertices[i + 1] = Math.random() - 0.5;
-                vertices[i + 2] = Math.random() - 0.5;
-                vertices[i + 3] = 1;                
+                vertices[i] = Math.random() * 2 - 1;
+                vertices[i + 1] = Math.random() * 2 - 1;
+                vertices[i + 2] = Math.random() * 2 - 1;
+                vertices[i + 3] = 1;             
             }
         } else {
             var count = 0;
@@ -53,35 +56,30 @@ class Renderer {
                 vertices[i + 3] = 1;
 
                 // Jittered points
-                vertices[i + 4] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                vertices[i + 5] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                vertices[i + 6] = this.mesh.vertices[count + 2] / this.sizeDivide; 
-                vertices[i + 7] = 1;
+                // vertices[i + 4] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                // vertices[i + 5] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                // vertices[i + 6] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                // vertices[i + 7] = 1;
 
-                vertices[i + 8] = this.mesh.vertices[count] / this.sizeDivide - Math.random() * 0.25 - 0.125;
-                vertices[i + 9] = this.mesh.vertices[count + 1] / this.sizeDivide - Math.random() * 0.25 - 0.125;
-                vertices[i + 10] = this.mesh.vertices[count + 2] / this.sizeDivide; 
-                vertices[i + 11] = 1;
-                
-                vertices[i + 12] = this.mesh.vertices[count] / this.sizeDivide;
-                vertices[i + 13] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                vertices[i + 14] = this.mesh.vertices[count + 2] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                vertices[i + 15] = 1;
+                // vertices[i + 8] = this.mesh.vertices[count] / this.sizeDivide;
+                // vertices[i + 9] = this.mesh.vertices[count + 1] / this.sizeDivide;
+                // vertices[i + 10] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                // vertices[i + 11] = 1;
 
-                vertices[i + 16] = this.mesh.vertices[count] / this.sizeDivide;
-                vertices[i + 17] = this.mesh.vertices[count + 1] / this.sizeDivide - Math.random() * 0.25 - 0.125;
-                vertices[i + 18] = this.mesh.vertices[count + 2] / this.sizeDivide - Math.random() * 0.25 - 0.125;
-                vertices[i + 19] = 1;
+                // vertices[i + 12] = this.mesh.vertices[count] / this.sizeDivide;
+                // vertices[i + 13] = this.mesh.vertices[count + 1] / this.sizeDivide;
+                // vertices[i + 14] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                // vertices[i + 15] = 1;
 
-                vertices[i + 20] = this.mesh.vertices[count] / this.sizeDivide;
-                vertices[i + 21] = this.mesh.vertices[count + 1] / this.sizeDivide;
-                vertices[i + 22] = this.mesh.vertices[count + 2] / this.sizeDivide + Math.random() * 0.25 - 0.125; 
-                vertices[i + 23] = 1;
+                // vertices[i + 16] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                // vertices[i + 17] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                // vertices[i + 18] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                // vertices[i + 19] = 1;
 
-                vertices[i + 24] = this.mesh.vertices[count] / this.sizeDivide;
-                vertices[i + 25] = this.mesh.vertices[count + 1] / this.sizeDivide;
-                vertices[i + 26] = this.mesh.vertices[count + 2] / this.sizeDivide - Math.random() * 0.25 - 0.125; 
-                vertices[i + 27] = 1;
+                // vertices[i + 20] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                // vertices[i + 21] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                // vertices[i + 22] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                // vertices[i + 23] = 1;
 
                 count += 3;                   
             }
@@ -126,8 +124,8 @@ class Renderer {
         
         // Get uniform locations
         this.mousePosLocation = gl.getUniformLocation(this.programFeedback, "u_mouse");
-        this.clock = gl.getUniformLocation(this.programFeedback, "u_time");
-        this.viewProjectionMatrix = gl.getUniformLocation(this.programFeedback, "u_viewProjectionMatrix")
+        this.uniformClock = gl.getUniformLocation(this.programFeedback, "u_time");
+        this.uniformViewProjectionMatrix = gl.getUniformLocation(this.programFeedback, "u_viewProjectionMatrix")
         
         // Create program to render particles
         this.programDisplay = createProgram(gl,
@@ -212,8 +210,8 @@ class Renderer {
 
         gl.useProgram(this.programFeedback);
         gl.uniform2fv(this.mousePosLocation, mousePos);
-        gl.uniform1f(this.programFeedback.u_time, this.clock); 
-        gl.uniformMatrix4fv(this.programFeedback.u_viewProjectionMatrix, false, this._viewProjectionMatrix);         
+        gl.uniform1f(this.uniformClock, this.clock); 
+        gl.uniformMatrix4fv(this.uniformViewProjectionMatrix, false, this._viewProjectionMatrix);         
 
         gl.beginTransformFeedback(gl.POINTS);
         gl.bindVertexArray(this.feedbackVAOs[currentIndex]);
