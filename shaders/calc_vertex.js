@@ -28,11 +28,11 @@ export const vertexFeedbackShader =
     vec2 newVelocity = a_velocity.xy + acceleration;
     vec2 newPositionXY = a_position.xy + newVelocity;    
     vec3 newPosition = vec3(newPositionXY, a_position.z);
-    newPosition = a_position.xyz;
+    // newPosition = a_position.xyz;
 
     // Rotate objects
-    // newPosition.x = newPosition.x * cos(PI/350.0) - newPosition.z * sin(PI/350.0);
-    // newPosition.z = newPosition.x * sin(PI/350.0) + newPosition.z * cos(PI/350.0);
+    newPosition.x = newPosition.x * cos(PI/350.0) - newPosition.z * sin(PI/350.0);
+    newPosition.z = newPosition.x * sin(PI/350.0) + newPosition.z * cos(PI/350.0);
 
     v_velocity = vec3(newVelocity * 0.99, a_velocity.z);
     v_position = vec4(newPosition, 1.0);

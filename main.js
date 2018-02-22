@@ -18,10 +18,11 @@ const TREE = 'Tree'
 export const params = {
   numParticles: 1e6,
   shape: TREE,
+  treeMesh: true,
 };
 
 var renderer;
-var tree = new Tree(new Vector3(0, -0.1, 0));
+var tree;
 // Ping Pong index
 var currentIndex = 0;
 
@@ -60,20 +61,47 @@ function setModel(model) {
       break;
     case TREE:
       renderer.sizeDivide = 100;
-      init(tree.grow());
-      renderLoop();
+      renderer.createTree = true;
+      if(params.treeMesh) {
+        tree = new Tree(new Vector3(-40, -50, 0));
+        renderer.createTree = true;
+        tree.meshProvided = true;
+        tree.sizeDivide = 20;
+        tree.repeatNum = 40;
+        loadMesh("./models/tea.obj.txt");
+      }
+      else {
+        tree = new Tree(new Vector3(0, -50, 0));
+        tree.generateCrown();
+        tree.generateTrunk();
+        init(tree.grow());
+        renderLoop();
+      }
       break;
   }
 }
 
 gui.add(params, 'shape', [HEAD, HORSE, RANDOM, SPIRAL, TEAPOT, TREE]).onChange(setModel);
 
+function createTree(mesh) {
+  tree.mesh = mesh;
+  tree.leafCount = mesh.vertexCount;
+  tree.generateCrown();
+  tree.generateTrunk();
+  init(tree.grow());
+  renderLoop();
+}
+
 function loadMesh(filename) {
   $.ajax({
       url: filename,
       dataType: 'text'
   }).done(function(data) {
+    if(params.shape == TREE && params.treeMesh) {
+      createTree(loadMeshData(data));
+    } else {
       init(loadMeshData(data));
+    }
   }).fail(function() {
       alert('Failed to retrieve [' + filename + "]");
   });
@@ -110,9 +138,13 @@ function renderLoop() {
 
   stats.begin();
 
-  var mesh = tree.grow();
-  if(mesh != null) {
-    init(mesh);
+  if(params.shape == TREE) {
+    if(!tree.doneGrowing) {
+      var mesh = tree.grow();
+      if(mesh != null && !tree.doneGrowing) {
+        init(mesh);
+      }
+    }
   }
 
   camera.updateMatrixWorld();

@@ -6,6 +6,9 @@ class Tree
 {
     constructor(position) {
         this.doneGrowing = false;
+        this.repeat = 0;
+        this.prevLeafCount = 0;
+        this.repeatNum = 200;
 
         this.position = position;
         this.leafCount = 400;
@@ -20,27 +23,42 @@ class Tree
         this.leaves = [];
         this.branches;
 
-        this.generateCrown();
-        this.generateTrunk();
+        this.meshProvided = false;
 
+        // this.generateCrown();
+        // this.generateTrunk();
     }
  
     generateCrown() {
         this.leaves = [];
-
-        for(var i = 0; i < this.leafCount; i++) {
-            let pos = new Vector3(Math.random() * this.treeWidth - this.treeWidth / 2, 
-                                  Math.random() * this.treeHeight - this.treeHeight / 2, 
-                                  Math.random() * this.treeWidth - this.treeWidth / 2);
-            let leaf = new Leaf(pos)
-            this.leaves[i] = leaf
+        
+        if(this.meshProvided) {
+            var index = 0;
+            for(var i = 0; i < this.leafCount; i++) {
+                let pos = new Vector3((this.mesh.vertices[index] / this.sizeDivide) * this.treeWidth - this.treeWidth / 2, 
+                                      (this.mesh.vertices[index + 1] / this.sizeDivide) * this.treeHeight - this.treeHeight / 2,
+                                      (this.mesh.vertices[index + 2] / this.sizeDivide) * this.treeWidth - this.treeWidth / 2);
+                let leaf = new Leaf(pos)
+                this.leaves[i] = leaf
+                index += 3;
+                console.log(pos.x, pos.y, pos.z);
+            }
+        }
+        else {
+            for(var i = 0; i < this.leafCount; i++) {
+                let pos = new Vector3(Math.random() * this.treeWidth - this.treeWidth / 2, 
+                                      Math.random() * this.treeHeight - this.treeHeight / 2, 
+                                      Math.random() * this.treeWidth - this.treeWidth / 2);
+                let leaf = new Leaf(pos)
+                this.leaves[i] = leaf
+            }
         }
     }
      
     generateTrunk()
     {
         var branches = [];
- 
+
         var root = new Branch(null, this.position, new Vector3(0, -1, 0));
         branches[0] = [root.position, root];
  
@@ -66,10 +84,14 @@ class Tree
  
     grow()
     {
+        // debugger;
         if (this.doneGrowing) return;
+        this.prevLeafCount = this.leafCount;
+        console.log(this.repeat);
+        console.log(this.leafCount);
  
         //If no leaves left, we are done
-        if (this.leafCount == 0) { 
+        if (this.leafCount == 0 || this.repeat > this.repeatNum) { 
             this.doneGrowing = true; 
             return; 
         }
@@ -110,10 +132,12 @@ class Tree
                     var posTemp = new Vector3(this.leaves[i].position.x,
                                               this.leaves[i].position.y,
                                               this.leaves[i].position.z);
-                    if (this.leaves[i].closestBranch == null)
+                    if (this.leaves[i].closestBranch == null) {
                         this.leaves[i].closestBranch = b;
-                    else if ((posTemp.sub(this.leaves[i].closestBranch.position)).length() > distance)
+                    }
+                    else if ((posTemp.sub(this.leaves[i].closestBranch.position)).length() > distance) {
                         this.leaves[i].closestBranch = b;
+                    }
                 }
             }
  
@@ -189,7 +213,6 @@ class Tree
             this.doneGrowing = true;
         }
         var treeMesh = this.branches.keys();
-        // var treeMesh = this.leaves;
         var vertices = [];
         var normals = [];
         var indices = [];
@@ -203,15 +226,6 @@ class Tree
           count++;
           index += 3;
         }
-        // for(var index = 0; index < 400; index+=3) {
-        //     if(treeMesh[count] != null) {
-        //         var pos = treeMesh[count].position;
-        //         vertices[index] = pos.x;
-        //         vertices[index + 1] = pos.y;
-        //         vertices[index + 2] = pos.z;
-        //     }
-        //     count++;
-        // }
         
         var mesh = {
           vertices: new Float32Array(vertices),
@@ -219,6 +233,10 @@ class Tree
           normals: new Float32Array(normals),
           indices: new Float32Array(indices),
         };
+
+        if(this.prevLeafCount == this.leafCount) {
+            this.repeat++;
+        }
 
         return mesh;
     }

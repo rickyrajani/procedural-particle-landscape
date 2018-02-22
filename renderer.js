@@ -19,6 +19,7 @@ class Renderer {
     constructor() {
         this.clock = 0.0;
         this.createRandom = false;
+        this.createTree = false;
         this.cube = false;
         this.sizeDivide = 20;
 
@@ -55,32 +56,33 @@ class Renderer {
                 vertices[i + 2] = this.mesh.vertices[count + 2] / this.sizeDivide; 
                 vertices[i + 3] = 1;
 
-                // Jittered points
-                // vertices[i + 4] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                // vertices[i + 5] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                // vertices[i + 6] = this.mesh.vertices[count + 2] / this.sizeDivide; 
-                // vertices[i + 7] = 1;
+                if(!this.createTree) {
+                    // Jittered points
+                    vertices[i + 4] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                    vertices[i + 5] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                    vertices[i + 6] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                    vertices[i + 7] = 1;
 
-                // vertices[i + 8] = this.mesh.vertices[count] / this.sizeDivide;
-                // vertices[i + 9] = this.mesh.vertices[count + 1] / this.sizeDivide;
-                // vertices[i + 10] = this.mesh.vertices[count + 2] / this.sizeDivide; 
-                // vertices[i + 11] = 1;
+                    vertices[i + 8] = this.mesh.vertices[count] / this.sizeDivide;
+                    vertices[i + 9] = this.mesh.vertices[count + 1] / this.sizeDivide;
+                    vertices[i + 10] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                    vertices[i + 11] = 1;
 
-                // vertices[i + 12] = this.mesh.vertices[count] / this.sizeDivide;
-                // vertices[i + 13] = this.mesh.vertices[count + 1] / this.sizeDivide;
-                // vertices[i + 14] = this.mesh.vertices[count + 2] / this.sizeDivide; 
-                // vertices[i + 15] = 1;
+                    vertices[i + 12] = this.mesh.vertices[count] / this.sizeDivide;
+                    vertices[i + 13] = this.mesh.vertices[count + 1] / this.sizeDivide;
+                    vertices[i + 14] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                    vertices[i + 15] = 1;
 
-                // vertices[i + 16] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                // vertices[i + 17] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                // vertices[i + 18] = this.mesh.vertices[count + 2] / this.sizeDivide; 
-                // vertices[i + 19] = 1;
+                    vertices[i + 16] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                    vertices[i + 17] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                    vertices[i + 18] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                    vertices[i + 19] = 1;
 
-                // vertices[i + 20] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                // vertices[i + 21] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
-                // vertices[i + 22] = this.mesh.vertices[count + 2] / this.sizeDivide; 
-                // vertices[i + 23] = 1;
-
+                    vertices[i + 20] = this.mesh.vertices[count] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                    vertices[i + 21] = this.mesh.vertices[count + 1] / this.sizeDivide + Math.random() * 0.25 - 0.125;
+                    vertices[i + 22] = this.mesh.vertices[count + 2] / this.sizeDivide; 
+                    vertices[i + 23] = 1;
+                }
                 count += 3;                   
             }
         }
