@@ -11,7 +11,7 @@ class Tree
         this.repeatNum = 200;
 
         this.position = position;
-        this.leafCount = 400;
+        this.leafCount = 800;
         this.treeWidth = 80;
         this.treeHeight = 150;
         this.trunkHeight = 40;
@@ -20,13 +20,10 @@ class Tree
         this.branchLength = 2;
 
         this.root;
-        this.leaves = [];
+        this.leaves;
         this.branches;
 
         this.meshProvided = false;
-
-        // this.generateCrown();
-        // this.generateTrunk();
     }
  
     generateCrown() {
@@ -41,7 +38,6 @@ class Tree
                 let leaf = new Leaf(pos)
                 this.leaves[i] = leaf
                 index += 3;
-                console.log(pos.x, pos.y, pos.z);
             }
         }
         else {
@@ -84,11 +80,8 @@ class Tree
  
     grow()
     {
-        // debugger;
         if (this.doneGrowing) return;
         this.prevLeafCount = this.leafCount;
-        console.log(this.repeat);
-        console.log(this.leafCount);
  
         //If no leaves left, we are done
         if (this.leafCount == 0 || this.repeat > this.repeatNum) { 

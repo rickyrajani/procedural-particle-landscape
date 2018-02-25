@@ -88,7 +88,7 @@ class Renderer {
         }
         this.vertexBuffers = [
             createBufferFromArray(vertices),
-            createBufferWithSize(this.totalParticles * 4 * 4)
+            createBufferFromArray(vertices)
         ];
 
         // Create velocity buffers
@@ -99,7 +99,7 @@ class Renderer {
 
         this.velocityBuffers = [
             createBufferFromArray(velocities),
-            createBufferWithSize(this.totalParticles * 3 * 4)
+            createBufferFromArray(velocities)
         ];
 
         // Create quad buffer

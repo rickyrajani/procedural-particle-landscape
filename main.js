@@ -18,7 +18,7 @@ const TREE = 'Tree'
 export const params = {
   numParticles: 1e6,
   shape: TREE,
-  treeMesh: true,
+  treeMesh: false,
 };
 
 var renderer;
@@ -62,6 +62,7 @@ function setModel(model) {
     case TREE:
       renderer.sizeDivide = 100;
       renderer.createTree = true;
+      renderer.jumpingIndex = 0;
       if(params.treeMesh) {
         tree = new Tree(new Vector3(-40, -50, 0));
         renderer.createTree = true;
@@ -89,6 +90,7 @@ function createTree(mesh) {
   tree.generateCrown();
   tree.generateTrunk();
   init(tree.grow());
+
   renderLoop();
 }
 
