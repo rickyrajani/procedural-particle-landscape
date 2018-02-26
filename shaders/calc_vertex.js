@@ -17,14 +17,19 @@ export const vertexFeedbackShader =
   float PI = 3.14159;
  
   void main() {
-    vec2 gravityCenter = u_mouse;
-    
-    float r = distance(a_position.xy, gravityCenter);
-    vec2 direction = gravityCenter - a_position.xy;
-    float force = PARTICLE_MASS * GRAVITY_CENTER_MASS / (r * r) * DAMPING;
-    float maxForce = min(force, DAMPING * 10.0);
+    vec2 acceleration = vec2(0.0, 0.0);
 
-    vec2 acceleration = (force / PARTICLE_MASS * direction) / 2.0;
+    if(u_time > 1000.0){
+      vec2 gravityCenter = u_mouse;
+    
+      float r = distance(a_position.xy, gravityCenter);
+      vec2 direction = gravityCenter - a_position.xy;
+      float force = PARTICLE_MASS * GRAVITY_CENTER_MASS / (r * r) * DAMPING;
+      float maxForce = min(force, DAMPING * 10.0);
+
+      acceleration = (force / PARTICLE_MASS * direction) / 2.0;
+    }
+
     vec2 newVelocity = a_velocity.xy + acceleration;
     vec2 newPositionXY = a_position.xy + newVelocity;    
     vec3 newPosition = vec3(newPositionXY, a_position.z);

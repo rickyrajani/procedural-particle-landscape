@@ -12,9 +12,9 @@ class Tree
 
         this.position = position;
         this.leafCount = 800;
-        this.treeWidth = 80;
-        this.treeHeight = 150;
-        this.trunkHeight = 40;
+        this.treeWidth = 110;
+        this.treeHeight = 200;
+        this.trunkHeight = 10;
         this.minDistance = 2;
         this.maxDistance = 15;
         this.branchLength = 2;
@@ -24,6 +24,7 @@ class Tree
         this.branches;
 
         this.meshProvided = false;
+        this.offset = this.treeHeight / 4;
     }
  
     generateCrown() {
@@ -32,9 +33,9 @@ class Tree
         if(this.meshProvided) {
             var index = 0;
             for(var i = 0; i < this.leafCount; i++) {
-                let pos = new Vector3((this.mesh.vertices[index] / this.sizeDivide) * this.treeWidth - this.treeWidth / 2, 
-                                      (this.mesh.vertices[index + 1] / this.sizeDivide) * this.treeHeight - this.treeHeight / 2,
-                                      (this.mesh.vertices[index + 2] / this.sizeDivide) * this.treeWidth - this.treeWidth / 2);
+                let pos = new Vector3((this.mesh.vertices[index] / this.scale) * this.treeWidth, 
+                                      (this.mesh.vertices[index + 1] / this.scale) * this.treeHeight - this.offset,
+                                      (this.mesh.vertices[index + 2] / this.scale) * this.treeWidth);
                 let leaf = new Leaf(pos)
                 this.leaves[i] = leaf
                 index += 3;
