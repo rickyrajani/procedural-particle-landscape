@@ -125,15 +125,22 @@ class Renderer {
         );
         
         // Get uniform locations
-        this.mousePosLocation = gl.getUniformLocation(this.programFeedback, "u_mouse");
-        this.uniformClock = gl.getUniformLocation(this.programFeedback, "u_time");
-        this.uniformViewProjectionMatrix = gl.getUniformLocation(this.programFeedback, "u_viewProjectionMatrix")
+        this.u_mousePosLocation = gl.getUniformLocation(this.programFeedback, "u_mouse");
+        this.u_clock = gl.getUniformLocation(this.programFeedback, "u_time");
+        this.u_viewProjectionMatrix = gl.getUniformLocation(this.programFeedback, "u_viewProjectionMatrix")
+        this.u_pause = gl.getUniformLocation(this.programFeedback, "u_pause");
+        this.u_gravity = gl.getUniformLocation(this.programFeedback, "u_gravity");
+        this.u_rotation = gl.getUniformLocation(this.programFeedback, "u_rotation");
         
         // Create program to render particles
         this.programDisplay = createProgram(gl,
             vertexDisplayShader,
             fragmentDisplayShader
         );
+
+        // Get uniform locations
+        this.u_ParticleSize = gl.getUniformLocation(this.programDisplay, "u_particleSize");
+        
         
         // Create program to post process framebuffer
         this.programPost = createProgram(gl,
@@ -211,9 +218,12 @@ class Renderer {
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, this.velocityBuffers[invertedIndex]);
 
         gl.useProgram(this.programFeedback);
-        gl.uniform2fv(this.mousePosLocation, mousePos);
-        gl.uniform1f(this.uniformClock, this.clock); 
-        gl.uniformMatrix4fv(this.uniformViewProjectionMatrix, false, this._viewProjectionMatrix);         
+        gl.uniform2fv(this.u_mousePosLocation, mousePos);
+        gl.uniform1f(this.u_clock, this.clock);
+        gl.uniformMatrix4fv(this.u_viewProjectionMatrix, false, this._viewProjectionMatrix);  
+        gl.uniform1i(this.u_pause, params.pauseApp);
+        gl.uniform1f(this.u_gravity, params.gravity);
+        gl.uniform1f(this.u_rotation, params.rotation);
 
         gl.beginTransformFeedback(gl.POINTS);
         gl.bindVertexArray(this.feedbackVAOs[currentIndex]);
@@ -238,6 +248,7 @@ class Renderer {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         gl.useProgram(this.programDisplay);
+        gl.uniform1f(this.u_ParticleSize, params.particleSize);        
         gl.bindVertexArray(this.displayVAOs[index]);
         gl.drawArrays(gl.POINTS, 0, this.totalParticles);
         gl.bindVertexArray(null);
@@ -251,6 +262,8 @@ class Renderer {
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
         gl.uniform1i(this.texLocation, 0);
+        gl.uniform1f(this.brightness, params.brightness);
+        gl.uniform1f(this.colorIntensity, params.colorIntensity);  
         gl.bindVertexArray(this.postVAO);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         gl.bindVertexArray(null);

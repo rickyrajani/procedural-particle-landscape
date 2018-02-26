@@ -8,7 +8,7 @@ class Tree
         this.doneGrowing = false;
         this.repeat = 0;
         this.prevLeafCount = 0;
-        this.repeatNum = 200;
+        this.repeatNum = 40;
 
         this.position = position;
         this.leafCount = 800;
