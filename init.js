@@ -4,6 +4,7 @@ import { PerspectiveCamera } from 'three';
 import OrbitControls from 'three-orbitcontrols';
 
 export const canvas = document.getElementById("canvas");
+export const musicElem = document.getElementById("music");
 export const gl = canvas.getContext('webgl2', {antialias: false});
 export const mousePos = [0, 0];
 export const gui = new DAT.GUI();

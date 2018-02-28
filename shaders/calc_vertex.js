@@ -21,7 +21,7 @@ export const vertexFeedbackShader =
   void main() {
     vec2 acceleration = vec2(0.0, 0.0);
 
-    if(u_time > 0.0 && u_pause == 0){
+    if(u_time > 100.0 && u_pause == 0){
       vec2 gravityCenter = u_mouse;
     
       float r = distance(a_position.xy, gravityCenter);

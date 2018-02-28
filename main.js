@@ -1,4 +1,4 @@
-import { gl, gui, stats, camera, cameraControls, canvas } from './init';
+import { gl, gui, stats, camera, cameraControls, canvas, musicElem } from './init';
 import { mat3, mat4, vec4 } from 'gl-matrix';
 import { invert, toggleFullscreen } from './libs/utils';
 import Renderer from './renderer';
@@ -27,6 +27,7 @@ export const params = {
   gravity: 50.0,
   rotation: 350.0,
   fullScreen: toggleFullscreen,
+  music: true,
 };
 
 // Shape
@@ -45,6 +46,7 @@ gui.add(params, 'rotation', 1.0, 360.0);
 // Controls
 gui.add(params, 'pause').onChange(pauseApp);
 gui.add(params, 'fullScreen');
+gui.add(params, 'music').onChange(toggleMusic);
 
 // Main renderer
 var renderer;
@@ -134,6 +136,15 @@ function pauseApp() {
     params.pauseApp = 0;
   }
 }
+
+function toggleMusic() {
+  if (musicElem.paused) {
+    musicElem.play();
+  }
+  else {
+    musicElem.pause();
+  }
+};
 
 function initTreeParams(pos) {
   renderer.scale = 100;
