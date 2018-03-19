@@ -181,8 +181,6 @@ export function loadMeshData(string) {
   return {
     vertices: new Float32Array(vertices),
     vertexCount: vertexCount,
-    normals: new Float32Array(normals),
-    indices: new Float32Array(indices),
   };
 }
 

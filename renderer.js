@@ -33,10 +33,6 @@ class Renderer {
     }
   
     createBuffers() {
-        // Create vertex buffers
-        // for(var i = 0; i < params.numParticles; i++) {
-        //     console.log(this.mesh.vertices[i]);
-        // }
         var extraParticles = params.numParticles * 6;
         this.totalParticles = params.numParticles + extraParticles;
         const vertices = new Float32Array((params.numParticles + extraParticles) * 4);   

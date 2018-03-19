@@ -17,6 +17,7 @@ const SPIRAL = 'Spiral';
 // GUI parameters
 export const params = {
   numParticles: 1e6,
+  particleCount: 1,
   shape: SPIRAL,
   tree: false,
   pause: false,
@@ -45,8 +46,8 @@ gui.add(params, 'rotation', 1.0, 360.0);
 
 // Controls
 gui.add(params, 'pause').onChange(pauseApp);
-gui.add(params, 'fullScreen');
 gui.add(params, 'music').onChange(toggleMusic);
+gui.add(params, 'fullScreen');
 
 // Main renderer
 var renderer;
@@ -63,26 +64,30 @@ function setModel(model) {
   model = params.shape;
   renderer = new Renderer();
   currentIndex = 0;
+  params.particleCount = 1;
 
   switch(model) {
     case HEAD:
       if(params.tree) {
-        initTreeParams(new Vector3(0, 0, 30));
-        tree.scale = 50;
-        tree.offset = 0;
+        renderer.scale = 100;
+        renderer.createTree = true;
+        renderer.jumpingIndex = 0;
+        loadMesh("./models/head_tree.obj");
       } else {
         renderer.scale = 25;    
+        loadMesh("./models/male_head.obj.txt");
       }
-      loadMesh("./models/male_head.obj.txt");
       break;
     case HORSE:
       if(params.tree) {
-        initTreeParams(new Vector3(0, 0, -10));
-        tree.scale = 400;
+        renderer.scale = 100;
+        renderer.createTree = true;
+        renderer.jumpingIndex = 0;
+        loadMesh("./models/horse_tree.obj");
       } else {
-        renderer.scale = 400;    
+        renderer.scale = 400;
+        loadMesh("./models/horse.obj.txt");
       }
-      loadMesh("./models/horse.obj.txt");
       break;
     case RANDOM:
       if(params.tree) {
@@ -101,27 +106,30 @@ function setModel(model) {
       break;
     case SPIRAL:
       if(params.tree) {
-        initTreeParams(new Vector3(20, 0, 0));      
-        tree.scale = 200;
+        renderer.scale = 100;
+        renderer.createTree = true;
+        renderer.jumpingIndex = 0;
+        loadMesh("./models/spiral_tree.obj");
       } else {
-        renderer.scale = 200;    
+        renderer.scale = 175;
+        loadMesh("./models/spiral.obj");        
       }
-      loadMesh("./models/spiral.obj");
       break;
     case TEAPOT:
       if(params.tree) {
-        initTreeParams(new Vector3(0, 0, 0));      
-        tree.scale = 20;
+        renderer.scale = 100;
+        renderer.createTree = true;
+        renderer.jumpingIndex = 0;
+        loadMesh("./models/teapot_tree.obj");
       } else {
         renderer.scale = 20;
+        loadMesh("./models/tea.obj.txt");
       }
-      loadMesh("./models/tea.obj.txt");
       break;
   }
 }
 
 function enableFullScreen() {
-  debugger;
   if(params.fullScreen) {
     canvas.requestFullscreen();
   } else {
@@ -153,17 +161,27 @@ function initTreeParams(pos) {
   tree = new Tree(pos);
   renderer.createTree = true;
   tree.meshProvided = true;
-  tree.repeatNum = 40;
+  tree.repeatNum = 80;
 }
 
-function createTree(mesh) {
+function createRandTree(mesh) {
   tree.mesh = mesh;
   tree.leafCount = mesh.vertexCount;
   tree.generateCrown();
   tree.generateTrunk();
-  init(tree.grow());
 
-  renderLoop();
+  var mesh = tree.grow();
+  if(mesh != null) {
+    init(mesh);
+    renderLoop();
+  }
+}
+
+function growTree(mesh) {
+  if(mesh != null) {
+    init(mesh);
+    renderLoop();
+  }
 }
 
 function loadMesh(filename) {
@@ -171,9 +189,10 @@ function loadMesh(filename) {
       url: filename,
       dataType: 'text'
   }).done(function(data) {
-    if(params.tree && params.shape != RANDOM) {
-      createTree(loadMeshData(data));
-    } else {
+    if(params.tree) {
+      growTree(loadMeshData(data));
+    }
+    else {
       init(loadMeshData(data));
     }
   }).fail(function() {
@@ -183,7 +202,13 @@ function loadMesh(filename) {
 
 function init(mesh) {
   if(!(params.shape == RANDOM && !params.tree)) {
-    params.numParticles = mesh.vertexCount;
+    if(params.shape != RANDOM && params.tree && params.particleCount < mesh.vertexCount) {
+      params.numParticles = params.particleCount;
+      params.particleCount += 10;
+    }
+    else {
+      params.numParticles = mesh.vertexCount;
+    }
     renderer.mesh = mesh;
   }
 
@@ -215,10 +240,20 @@ function renderLoop() {
   stats.begin();
 
   if(params.tree) {
-    if(!tree.doneGrowing) {
-      var mesh = tree.grow();
-      if(mesh != null && !tree.doneGrowing) {
-        init(mesh);
+    var mesh = renderer.mesh;
+    if(params.shape == RANDOM) {
+      if(!tree.doneGrowing) {
+        mesh = tree.grow();
+        if(mesh != null && !tree.doneGrowing) {
+          init(mesh);
+        }
+      }
+    }
+    else {
+      if(params.particleCount < mesh.vertexCount) {
+        if(mesh != null) {
+          init(mesh);
+        }
       }
     }
   }

@@ -28,7 +28,7 @@ class Tree
     }
  
     generateCrown() {
-        this.leaves = [];
+        this.leaves = new Set();
         
         if(this.meshProvided) {
             var index = 0;
@@ -36,8 +36,8 @@ class Tree
                 let pos = new Vector3((this.mesh.vertices[index] / this.scale) * this.treeWidth, 
                                       (this.mesh.vertices[index + 1] / this.scale) * this.treeHeight - this.offset,
                                       (this.mesh.vertices[index + 2] / this.scale) * this.treeWidth);
-                let leaf = new Leaf(pos)
-                this.leaves[i] = leaf
+                let leaf = new Leaf(pos);
+                this.leaves.add(leaf);
                 index += 3;
             }
         }
@@ -46,8 +46,8 @@ class Tree
                 let pos = new Vector3(Math.random() * this.treeWidth - this.treeWidth / 2, 
                                       Math.random() * this.treeHeight - this.treeHeight / 2, 
                                       Math.random() * this.treeWidth - this.treeWidth / 2);
-                let leaf = new Leaf(pos)
-                this.leaves[i] = leaf
+                let leaf = new Leaf(pos);
+                this.leaves.add(leaf);
             }
         }
     }
@@ -92,62 +92,62 @@ class Tree
         var branchesIter1 = this.branches.values();
  
         // Process the leaves
-        for (var i = 0; i < this.leafCount; i++)
+        for (let currLeaf of this.leaves)
         {
-            if(this.leaves[i] == null) {
+            if(currLeaf == null) {
                 continue;
             }
             branchesIter1 = this.branches.values();
             let leafRemoved = false;
  
-            this.leaves[i].closestBranch = null;
+            currLeaf.closestBranch = null;
             var direction = new Vector3(0, 0, 0);
  
             // Find the nearest branch for this leaf
             for(let b; !(b = branchesIter1.next()).done;)
             {
                 b = b.value;
-                direction = new Vector3(this.leaves[i].position.x, 
-                                        this.leaves[i].position.y, 
-                                        this.leaves[i].position.z);
+                direction = new Vector3(currLeaf.position.x, 
+                                        currLeaf.position.y, 
+                                        currLeaf.position.z);
                 direction = direction.sub(b.position); //direction to branch from leaf
                 var distance = Math.round(direction.length()); //distance to branch from leaf
                 direction.normalize();
  
                 if (distance <= this.minDistance) // Min leaf distance reached, we remove it
                 {
-                    this.leaves[i] = null;                        
+                    this.leaves.delete(currLeaf);                        
                     leafRemoved = true;
                     this.leafCount--;
                     break;
                 }
                 else if (distance <= this.maxDistance) // branch in range, determine if it is the nearest
                 {
-                    var posTemp = new Vector3(this.leaves[i].position.x,
-                                              this.leaves[i].position.y,
-                                              this.leaves[i].position.z);
-                    if (this.leaves[i].closestBranch == null) {
-                        this.leaves[i].closestBranch = b;
+                    var posTemp = new Vector3(currLeaf.position.x,
+                                              currLeaf.position.y,
+                                              currLeaf.position.z);
+                    if (currLeaf.closestBranch == null) {
+                        currLeaf.closestBranch = b;
                     }
-                    else if ((posTemp.sub(this.leaves[i].closestBranch.position)).length() > distance) {
-                        this.leaves[i].closestBranch = b;
+                    else if ((posTemp.sub(currLeaf.closestBranch.position)).length() > distance) {
+                        currLeaf.closestBranch = b;
                     }
                 }
             }
  
-            // if the leaf was removed, skip
+            // If the leaf was removed then skip
             if (!leafRemoved)
             {
                 // Set the grow parameters on all the closest branches that are in range
-                if (this.leaves[i].closestBranch != null)
+                if (currLeaf.closestBranch != null)
                 {
-                    var dir = new Vector3(this.leaves[i].position.x,
-                                          this.leaves[i].position.y,
-                                          this.leaves[i].position.z);
-                    dir = dir.sub(this.leaves[i].closestBranch.position);
+                    var dir = new Vector3(currLeaf.position.x,
+                                          currLeaf.position.y,
+                                          currLeaf.position.z);
+                    dir = dir.sub(currLeaf.closestBranch.position);
                     dir.normalize();
-                    this.leaves[i].closestBranch.growDirection = (this.leaves[i].closestBranch.growDirection).add(dir); //add to grow direction of branch
-                    this.leaves[i].closestBranch.growCount++;
+                    currLeaf.closestBranch.growDirection = (currLeaf.closestBranch.growDirection).add(dir); //add to grow direction of branch
+                    currLeaf.closestBranch.growCount++;
                 }
             }
         }
@@ -159,9 +159,6 @@ class Tree
         for(let b; !(b = branchesIter.next()).done;)
         {
             b = b.value;
-            if(b == null) {
-                debugger;
-            }
             if (b.growCount > 0) // if at least one leaf is affecting the branch
             {
                 var avgDirection = new Vector3(0, 0, 0);
@@ -208,8 +205,6 @@ class Tree
         }
         var treeMesh = this.branches.keys();
         var vertices = [];
-        var normals = [];
-        var indices = [];
         var count = 0;
         var index = 0;
 
@@ -224,8 +219,6 @@ class Tree
         var mesh = {
           vertices: new Float32Array(vertices),
           vertexCount: count,
-          normals: new Float32Array(normals),
-          indices: new Float32Array(indices),
         };
 
         if(this.prevLeafCount == this.leafCount) {
