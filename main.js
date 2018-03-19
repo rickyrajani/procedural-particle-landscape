@@ -29,6 +29,7 @@ export const params = {
   rotation: 350.0,
   fullScreen: toggleFullscreen,
   music: true,
+  growthSpeed: 5,
 };
 
 // Shape
@@ -43,6 +44,7 @@ gui.add(params, 'particleSize', 1.0, 7.0);
 // Physics
 gui.add(params, 'gravity', 0.0, 100.0);
 gui.add(params, 'rotation', 1.0, 360.0);
+gui.add(params, 'growthSpeed', 1, 20);
 
 // Controls
 gui.add(params, 'pause').onChange(pauseApp);
@@ -204,7 +206,7 @@ function init(mesh) {
   if(!(params.shape == RANDOM && !params.tree)) {
     if(params.shape != RANDOM && params.tree && params.particleCount < mesh.vertexCount) {
       params.numParticles = params.particleCount;
-      params.particleCount += 10;
+      params.particleCount += params.growthSpeed;
     }
     else {
       params.numParticles = mesh.vertexCount;
