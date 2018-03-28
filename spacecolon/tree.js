@@ -14,7 +14,7 @@ class Tree
         this.leafCount = 800;
         this.treeWidth = 110;
         this.treeHeight = 200;
-        this.trunkHeight = 10;
+        this.trunkHeight = 5;
         this.minDistance = 2;
         this.maxDistance = 15;
         this.branchLength = 2;

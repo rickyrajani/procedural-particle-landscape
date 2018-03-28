@@ -34,6 +34,7 @@ class Renderer {
   
     createBuffers() {
         var extraParticles = params.numParticles * 6;
+        // var extraParticles = 0;
         this.totalParticles = params.numParticles + extraParticles;
         const vertices = new Float32Array((params.numParticles + extraParticles) * 4);   
         if(this.createRandom) {
@@ -123,7 +124,6 @@ class Renderer {
         // Get uniform locations
         this.u_mousePosLocation = gl.getUniformLocation(this.programFeedback, "u_mouse");
         this.u_clock = gl.getUniformLocation(this.programFeedback, "u_time");
-        this.u_viewProjectionMatrix = gl.getUniformLocation(this.programFeedback, "u_viewProjectionMatrix")
         this.u_pause = gl.getUniformLocation(this.programFeedback, "u_pause");
         this.u_gravity = gl.getUniformLocation(this.programFeedback, "u_gravity");
         this.u_rotation = gl.getUniformLocation(this.programFeedback, "u_rotation");
@@ -136,7 +136,7 @@ class Renderer {
 
         // Get uniform locations
         this.u_ParticleSize = gl.getUniformLocation(this.programDisplay, "u_particleSize");
-        
+        this.u_viewProjectionMatrix = gl.getUniformLocation(this.programDisplay, "u_viewProjectionMatrix")
         
         // Create program to post process framebuffer
         this.programPost = createProgram(gl,
@@ -216,7 +216,6 @@ class Renderer {
         gl.useProgram(this.programFeedback);
         gl.uniform2fv(this.u_mousePosLocation, mousePos);
         gl.uniform1f(this.u_clock, this.clock);
-        gl.uniformMatrix4fv(this.u_viewProjectionMatrix, false, this._viewProjectionMatrix);  
         gl.uniform1i(this.u_pause, params.pauseApp);
         gl.uniform1f(this.u_gravity, params.gravity);
         gl.uniform1f(this.u_rotation, params.rotation);
@@ -244,7 +243,8 @@ class Renderer {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         gl.useProgram(this.programDisplay);
-        gl.uniform1f(this.u_ParticleSize, params.particleSize);        
+        gl.uniform1f(this.u_ParticleSize, params.particleSize); 
+        gl.uniformMatrix4fv(this.u_viewProjectionMatrix, false, this._viewProjectionMatrix);                 
         gl.bindVertexArray(this.displayVAOs[index]);
         gl.drawArrays(gl.POINTS, 0, this.totalParticles);
         gl.bindVertexArray(null);

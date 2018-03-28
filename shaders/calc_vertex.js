@@ -9,7 +9,6 @@ export const vertexFeedbackShader =
   
   uniform vec2 u_mouse;
   uniform float u_time;
-  uniform mat4 u_viewProjectionMatrix;
   uniform int u_pause;
   uniform float u_gravity;
   uniform float u_rotation;
@@ -21,7 +20,7 @@ export const vertexFeedbackShader =
   void main() {
     vec2 acceleration = vec2(0.0, 0.0);
 
-    if(u_time > 100.0 && u_pause == 0){
+    if(u_time > 200.0 && u_pause == 0){
       vec2 gravityCenter = u_mouse;
     
       float r = distance(a_position.xy, gravityCenter);
@@ -37,12 +36,14 @@ export const vertexFeedbackShader =
     vec3 newPosition = vec3(newPositionXY, a_position.z);
 
     // Rotate objects
-    newPosition.x = newPosition.x * cos(PI/350.0) - newPosition.z * sin(PI/u_rotation);
-    newPosition.z = newPosition.x * sin(PI/350.0) + newPosition.z * cos(PI/u_rotation);
+    if(u_pause == 0) {
+      newPosition.x = newPosition.x * cos(PI/350.0) - newPosition.z * sin(PI/u_rotation);
+      newPosition.z = newPosition.x * sin(PI/350.0) + newPosition.z * cos(PI/u_rotation);
+    }
 
     v_velocity = vec3(newVelocity * 0.99, a_velocity.z);
     v_position = vec4(newPosition, 1.0);
-
+    
     // Bounce at borders
     if (v_position.x > 1.0 || v_position.x < -1.0) {
       v_velocity.x *= -0.5;
@@ -50,6 +51,10 @@ export const vertexFeedbackShader =
     
     if (v_position.y > 1.0 || v_position.y < -1.0) {
       v_velocity.y *= -0.5;
+    }
+
+    if (v_position.z > 1.0 || v_position.z < -1.0) {
+      v_velocity.z *= -0.5;
     }
   }
 `;

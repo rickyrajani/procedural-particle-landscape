@@ -7,18 +7,18 @@ import Tree from "./spacecolon/tree";
 import { Vector3 } from 'three';
 
 // Meshes
-const RANDOM = 'Random';
-const TEAPOT = 'Teapot';
-const HORSE = 'Horse';
 const HEAD = 'Head';
-const CUBE = 'Cube';
+const HORSE = 'Horse';
+const RANDOM = 'Random';
+const ROSE = 'Rose';
 const SPIRAL = 'Spiral';
+const TEAPOT = 'Teapot';
 
 // GUI parameters
 export const params = {
-  numParticles: 1e6,
+  numParticles: 2e2,
   particleCount: 1,
-  shape: SPIRAL,
+  shape: RANDOM,
   tree: false,
   pause: false,
   pauseApp: 0,
@@ -33,7 +33,7 @@ export const params = {
 };
 
 // Shape
-gui.add(params, 'shape', [HEAD, HORSE, RANDOM, SPIRAL, TEAPOT]).onChange(setModel);
+gui.add(params, 'shape', [HEAD, HORSE, ROSE, RANDOM, SPIRAL, TEAPOT]).onChange(setModel);
 gui.add(params, 'tree').onChange(setModel);
 
 // Appearance
@@ -44,7 +44,7 @@ gui.add(params, 'particleSize', 1.0, 7.0);
 // Physics
 gui.add(params, 'gravity', 0.0, 100.0);
 gui.add(params, 'rotation', 1.0, 360.0);
-gui.add(params, 'growthSpeed', 1, 20);
+gui.add(params, 'growthSpeed', 1, 30);
 
 // Controls
 gui.add(params, 'pause').onChange(pauseApp);
@@ -54,7 +54,7 @@ gui.add(params, 'fullScreen');
 // Main renderer
 var renderer;
 
-// Space Colonization Algo tree
+// Space Colonization tree
 var tree;
 
 // Ping Pong index
@@ -89,6 +89,17 @@ function setModel(model) {
       } else {
         renderer.scale = 400;
         loadMesh("./models/horse.obj.txt");
+      }
+      break;
+    case ROSE:
+      if(params.tree) {
+        initTreeParams(new Vector3(0, -30, 0));
+        tree.scale = 5;
+        tree.repeatNum = 200;
+        loadMesh("./models/lotus_tree.obj");        
+      } else {
+        renderer.scale = 5;
+        loadMesh("./models/lotus.obj");
       }
       break;
     case RANDOM:
@@ -179,6 +190,32 @@ function createRandTree(mesh) {
   }
 }
 
+function createTree(mesh) {
+  if(mesh != null) {
+    tree.mesh = mesh;
+    tree.leafCount = mesh.vertexCount;
+    tree.generateCrown();
+    tree.generateTrunk();
+
+    // Preprocess SCA tree 
+    let meshTree = tree.grow();
+    while(!tree.doneGrowing) {
+      let temp = tree.grow();
+      if(temp != null) {
+        meshTree = temp;
+      }
+    }
+
+    // Print out vertices for trees
+    for(let i = 0; i < meshTree.vertexCount * 3; i+=3) {
+      console.log(meshTree.vertices[i], meshTree.vertices[i + 1], meshTree.vertices[i + 2]);
+    }
+
+    init(meshTree);
+    renderLoop();
+  }
+}
+
 function growTree(mesh) {
   if(mesh != null) {
     init(mesh);
@@ -241,7 +278,18 @@ function renderLoop() {
 
   stats.begin();
 
-  if(params.tree) {
+  camera.updateMatrixWorld();
+  mat4.invert(renderer._viewMatrix, camera.matrixWorld.elements);
+  mat4.copy(renderer._projectionMatrix, camera.projectionMatrix.elements);
+  mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
+
+  // Render to the whole screen
+  gl.viewport(0, 0, canvas.width, canvas.height);
+
+  // Clear the frame
+  gl.clear(gl.CLEAR_COLOR_BIT);
+
+  if(params.tree && !params.pause) {
     var mesh = renderer.mesh;
     if(params.shape == RANDOM) {
       if(!tree.doneGrowing) {
@@ -260,15 +308,8 @@ function renderLoop() {
     }
   }
 
-  camera.updateMatrixWorld();
-  mat4.invert(renderer._viewMatrix, camera.matrixWorld.elements);
-  mat4.copy(renderer._projectionMatrix, camera.projectionMatrix.elements);
-  mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
-
   renderer.calculateFeedback(currentIndex);
   renderer.drawToFrameBuffer(invertedIndex);
-
-  gl.clear(gl.CLEAR_COLOR_BIT);
 
   renderer.drawQuad();
 

@@ -1,4 +1,4 @@
-import { gl, canvas, camera } from '../init';
+import { gl, canvas } from '../init';
 import { Vector3, Matrix4 } from 'three';
 import { mat3, mat4, vec4, vec3 } from 'gl-matrix';
 
