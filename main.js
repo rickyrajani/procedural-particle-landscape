@@ -1,10 +1,17 @@
-import { gl, gui, stats, camera, cameraControls, canvas, musicElem } from './init';
+import { gl, stats, gui, camera, cameraControls, canvas, musicElem } from './init';
 import { mat3, mat4, vec4 } from 'gl-matrix';
-import { invert, toggleFullscreen } from './libs/utils';
+import { invert, toggleFullscreen, makePerspective } from './libs/utils';
 import Renderer from './renderer';
 import { loadMeshData } from './libs/utils';
 import Tree from "./spacecolon/tree";
 import { Vector3 } from 'three';
+
+// WebVR variables
+var frameData = new VRFrameData();
+var vrDisplay;
+var btn = document.querySelector('.stop-start');
+var normalSceneFrame;
+var vrSceneFrame;
 
 // Meshes
 const HEAD = 'Head';
@@ -16,7 +23,7 @@ const TEAPOT = 'Teapot';
 
 // GUI parameters
 export const params = {
-  numParticles: 2e2,
+  numParticles: 1e5,
   particleCount: 1,
   shape: RANDOM,
   tree: false,
@@ -271,13 +278,19 @@ function init(mesh) {
   }
 }
 
-function renderLoop() {
-  const invertedIndex = invert(currentIndex);
+function drawScene() {
   renderer.update();
   cameraControls.update();
 
   stats.begin();
 
+  const invertedIndex = invert(currentIndex);
+  currentIndex = invert(currentIndex);  
+  
+  // Request the next frame of the animation
+  normalSceneFrame = window.requestAnimationFrame(drawScene);
+
+  // Update camera
   camera.updateMatrixWorld();
   mat4.invert(renderer._viewMatrix, camera.matrixWorld.elements);
   mat4.copy(renderer._projectionMatrix, camera.projectionMatrix.elements);
@@ -314,8 +327,135 @@ function renderLoop() {
   renderer.drawQuad();
 
   stats.end();
+}
 
+function drawVRScene() {
+  renderer.update();
+  cameraControls.update();
+
+  stats.begin();
+  
+  const invertedIndex = invert(currentIndex);
+  currentIndex = invert(currentIndex);    
+
+  // WebVR: Request the next frame of the animation
+  vrSceneFrame = vrDisplay.requestAnimationFrame(drawVRScene);
+
+  // Populate frameData with the data of the next frame to display
+  vrDisplay.getFrameData(frameData);
+
+  // You can get the position, orientation, etc. of the display from the current frame's pose
+  var curFramePose = frameData.pose;
+  var curPos = curFramePose.position;
+  var curOrient = curFramePose.orientation;
+  if(poseStatsDisplayed) {
+    displayPoseStats(curFramePose);
+  }
+
+  // Clear the canvas before we start drawing on it.
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // WebVR: Create the required projection and view matrix locations needed
+  // for passing into the uniformMatrix4fv methods below
+  camera.updateMatrixWorld();
+  mat4.invert(renderer._viewMatrix, camera.matrixWorld.elements);
+  mat4.copy(renderer._projectionMatrix, camera.projectionMatrix.elements);
+  mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
+
+  var projectionMatrixLocation = gl.getUniformLocation(shaderProgram, "projMatrix");
+  var viewMatrixLocation = gl.getUniformLocation(shaderProgram, "viewMatrix");
+
+  // WebVR: Render the left eye’s view to the left half of the canvas
+  gl.viewport(0, 0, canvas.width * 0.5, canvas.height);
+  mat4.copy(renderer._projectionMatrix, frameData.leftProjectionMatrix);
+  mat4.copy(renderer._viewMatrix, frameData.leftViewMatrix);  
+  mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
+  drawGeometry();
+
+  // WebVR: Render the right eye’s view to the right half of the canvas
+  gl.viewport(canvas.width * 0.5, 0, canvas.width * 0.5, canvas.height);
+  mat4.copy(renderer._projectionMatrix, frameData.rightProjectionMatrix);
+  mat4.copy(renderer._viewMatrix, frameData.rightViewMatrix);  
+  mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
+  drawGeometry();
+
+  function drawGeometry() {
+    if(params.tree && !params.pause) {
+      var mesh = renderer.mesh;
+      if(params.shape == RANDOM) {
+        if(!tree.doneGrowing) {
+          mesh = tree.grow();
+          if(mesh != null && !tree.doneGrowing) {
+            init(mesh);
+          }
+        }
+      }
+      else {
+        if(params.particleCount < mesh.vertexCount) {
+          if(mesh != null) {
+            init(mesh);
+          }
+        }
+      }
+    }
+  
+    renderer.calculateFeedback(currentIndex);
+    renderer.drawToFrameBuffer(invertedIndex);
+  
+    renderer.drawQuad();
+  }
+
+  // WebVR: Indicate that we are ready to present the rendered frame to the VR display
+  vrDisplay.submitFrame();
+
+  stats.end();
+}
+
+function renderLoop() {
   // switch index for next iteration
-  currentIndex = invert(currentIndex);
-  requestAnimationFrame(renderLoop);
+  drawScene();
+
+  if(navigator.getVRDisplays) {
+    console.log('WebVR 1.1 supported');
+    // Then get the displays attached to the computer
+    navigator.getVRDisplays().then(function(displays) {
+      // If a display is available, use it to present the scene
+      if(displays.length > 0) {
+        vrDisplay = displays[0];
+        console.log('Display found');
+        // Starting the presentation when the button is clicked: It can only be called in response to a user gesture
+        btn.addEventListener('click', function() {
+          if(btn.textContent === 'Start VR display') {
+            vrDisplay.requestPresent([{ source: canvas }]).then(function() {
+              console.log('Presenting to WebVR display');
+
+              // Set the canvas size to the size of the vrDisplay viewport
+              var leftEye = vrDisplay.getEyeParameters('left');
+              var rightEye = vrDisplay.getEyeParameters('right');
+
+              canvas.width = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2;
+              canvas.height = Math.max(leftEye.renderHeight, rightEye.renderHeight);
+
+              // stop the normal presentation, and start the vr presentation
+              window.cancelAnimationFrame(normalSceneFrame);
+              drawVRScene();
+
+              btn.textContent = 'Exit VR display';
+            });
+          } else {
+            vrDisplay.exitPresent();
+            console.log('Stopped presenting to WebVR display');
+
+            btn.textContent = 'Start VR display';
+
+            // Stop the VR presentation, and start the normal presentation
+            vrDisplay.cancelAnimationFrame(vrSceneFrame);
+            drawScene();
+          }
+        });
+      }
+    });
+  } else {
+    console.log('WebVR API not supported by this browser.');
+  }
 }

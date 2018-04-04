@@ -43,19 +43,21 @@ export function createProgram(gl, vertexShaderSource, fragmentShaderSource, vary
     }
     gl.linkProgram(program);
 
-    // check status
-    var log = gl.getProgramInfoLog(program);
-    if (log) {
-      console.error("Program Info: ", log);
-      gl.deleteProgram(program);
-      return null;
-    }
+    if (!($.browser.mozilla)) {
+      // check status
+      var log = gl.getProgramInfoLog(program);
+      if (log) {
+        console.error("Program Info: ", log);
+        gl.deleteProgram(program);
+        return null;
+      }
 
-    log = gl.getShaderInfoLog(vshader);
-    if (log) {
-      console.error("Shader Info: ", log);
-      gl.deleteProgram(program);
-      return null;
+      log = gl.getShaderInfoLog(vshader);
+      if (log) {
+        console.error("Shader Info: ", log);
+        gl.deleteProgram(program);
+        return null;
+      }
     }
 
     return program;
@@ -208,3 +210,16 @@ export var toggleFullscreen = function() {
       }
   }
 };
+
+//
+// gluPerspective
+//
+export function makePerspective(fovy, aspect, znear, zfar)
+{
+    var ymax = znear * Math.tan(fovy * Math.PI / 360.0);
+    var ymin = -ymax;
+    var xmin = ymin * aspect;
+    var xmax = ymax * aspect;
+
+    return makeFrustum(xmin, xmax, ymin, ymax, znear, zfar);
+}

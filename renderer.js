@@ -120,7 +120,7 @@ class Renderer {
             ['v_position', 'v_velocity'],
             gl.SEPARATE_ATTRIBS
         );
-        
+
         // Get uniform locations
         this.u_mousePosLocation = gl.getUniformLocation(this.programFeedback, "u_mouse");
         this.u_clock = gl.getUniformLocation(this.programFeedback, "u_time");
