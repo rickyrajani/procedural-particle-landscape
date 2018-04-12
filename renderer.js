@@ -198,14 +198,17 @@ class Renderer {
     }
 
     // Fill the current feedback buffer
-    calculateFeedback(currentIndex) {
+    calculateFeedback(currentIndex, i) {
         // Create a framebuffer and attach the texture
         this.framebuffer = gl.createFramebuffer();
 
         // Create transform feedback
         this.transformFeedback = gl.createTransformFeedback();
         
-        const invertedIndex = invert(currentIndex);
+        var invertedIndex = currentIndex;
+        if(i == 1) {
+            invertedIndex = invert(currentIndex);            
+        }
         // Disable rasterization, vertex processing only
         gl.enable(gl.RASTERIZER_DISCARD);
 

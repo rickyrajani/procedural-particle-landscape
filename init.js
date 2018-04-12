@@ -19,7 +19,7 @@ var linVelStats = document.querySelector('.lin-vel');
 var linAccStats = document.querySelector('.lin-acc');
 var angVelStats = document.querySelector('.ang-vel');
 var angAccStats = document.querySelector('.ang-acc');
-var poseStatsDisplayed = false;
+export var poseStatsDisplayed = false;
 
 // Initialize statistics widget
 export const stats = new Stats();
@@ -50,7 +50,7 @@ function setSize(width, height) {
   canvas.width = width;
   canvas.height = height;
   camera.aspect = width / height;
-  // gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.viewport(0, 0, canvas.width, canvas.height);
   camera.updateProjectionMatrix();
 }
 
@@ -87,7 +87,7 @@ poseStatsBtn.addEventListener('click', function() {
   }
 });
 
-function displayPoseStats(pose) {
+export function displayPoseStats(pose) {
   var pos = pose.position;
   var orient = pose.orientation;
   var linVel = pose.linearVelocity;

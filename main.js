@@ -1,4 +1,4 @@
-import { gl, stats, gui, camera, cameraControls, canvas, musicElem } from './init';
+import { gl, stats, gui, camera, cameraControls, canvas, musicElem, poseStatsDisplayed, displayPoseStats } from './init';
 import { mat3, mat4, vec4 } from 'gl-matrix';
 import { invert, toggleFullscreen, makePerspective } from './libs/utils';
 import Renderer from './renderer';
@@ -321,7 +321,7 @@ function drawScene() {
     }
   }
 
-  renderer.calculateFeedback(currentIndex);
+  renderer.calculateFeedback(currentIndex, 1);
   renderer.drawToFrameBuffer(invertedIndex);
 
   renderer.drawQuad();
@@ -362,24 +362,24 @@ function drawVRScene() {
   mat4.copy(renderer._projectionMatrix, camera.projectionMatrix.elements);
   mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
 
-  var projectionMatrixLocation = gl.getUniformLocation(shaderProgram, "projMatrix");
-  var viewMatrixLocation = gl.getUniformLocation(shaderProgram, "viewMatrix");
+  // var projectionMatrixLocation = gl.getUniformLocation(shaderProgram, "projMatrix");
+  // var viewMatrixLocation = gl.getUniformLocation(shaderProgram, "viewMatrix");
 
   // WebVR: Render the left eye’s view to the left half of the canvas
   gl.viewport(0, 0, canvas.width * 0.5, canvas.height);
   mat4.copy(renderer._projectionMatrix, frameData.leftProjectionMatrix);
   mat4.copy(renderer._viewMatrix, frameData.leftViewMatrix);  
   mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
-  drawGeometry();
+  drawGeometry(1);
 
   // WebVR: Render the right eye’s view to the right half of the canvas
   gl.viewport(canvas.width * 0.5, 0, canvas.width * 0.5, canvas.height);
   mat4.copy(renderer._projectionMatrix, frameData.rightProjectionMatrix);
   mat4.copy(renderer._viewMatrix, frameData.rightViewMatrix);  
   mat4.multiply(renderer._viewProjectionMatrix, renderer._projectionMatrix, renderer._viewMatrix);
-  drawGeometry();
+  drawGeometry(0);
 
-  function drawGeometry() {
+  function drawGeometry(invert) {
     if(params.tree && !params.pause) {
       var mesh = renderer.mesh;
       if(params.shape == RANDOM) {
@@ -399,7 +399,7 @@ function drawVRScene() {
       }
     }
   
-    renderer.calculateFeedback(currentIndex);
+    renderer.calculateFeedback(currentIndex, invert);
     renderer.drawToFrameBuffer(invertedIndex);
   
     renderer.drawQuad();
