@@ -34,7 +34,7 @@ cameraControls.zoomSpeed = 1.0;
 cameraControls.panSpeed = 2.0;
 
 // Handle canvas resize
-function setSize(width, height) {
+export function setSize(width, height) {
   canvas.width = width;
   canvas.height = height;
   camera.aspect = width / height;

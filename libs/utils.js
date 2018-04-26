@@ -1,4 +1,4 @@
-import { gl, canvas } from '../init';
+import { gl, canvas, setSize } from '../init';
 import { Vector3, Matrix4 } from 'three';
 import { mat3, mat4, vec4, vec3 } from 'gl-matrix';
 
@@ -184,6 +184,7 @@ export function loadMeshData(string) {
   };
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
 export var toggleFullscreen = function() {
   if (!document.fullscreenElement &&    // alternative standard method
       !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
@@ -207,4 +208,5 @@ export var toggleFullscreen = function() {
           document.webkitExitFullscreen();
       }
   }
+  setSize(canvas.clientWidth, canvas.clientHeight);
 };
