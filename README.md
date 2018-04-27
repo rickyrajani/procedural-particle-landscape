@@ -29,3 +29,4 @@ The project will use the WebVR API to be able to present the application in virt
 - [Modeling Trees with Space Colonization Algorithm](http://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf)
 - [Space Colonization Tutorial](http://www.jgallant.com/procedurally-generating-trees-with-space-colonization-algorithm-in-xna/)
 - [WebVR Tutorial](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API/Using_the_WebVR_API)
+- [3D Models](https://www.turbosquid.com/)
